@@ -30,7 +30,7 @@ async function fetchCmcQuotes(symbols: string[]): Promise<Record<string, { price
   }
 }
 
-async function fetchAndStoreMirages() {
+export async function fetchAndStoreMirages() {
   try {
     const { rows: symbols } = await pool.query('SELECT * FROM symbols')
     const symbolNames = symbols.map((s: any) => s.symbol)

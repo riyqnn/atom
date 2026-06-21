@@ -31,7 +31,7 @@ export async function initApp() {
     // ── GET /mirage/latest ──────────────────────────────
     app.get('/mirage/latest', async (_req, reply) => {
       try {
-        const { rows } = await pool.query(`
+        let { rows } = await pool.query(`
           SELECT DISTINCT ON (m.symbol_id)
             m.id, m.symbol_id, m.oi_percentile, m.bid_ask_ratio,
             m.funding_rate, m.mirage_score, m.status, m.price,
@@ -41,6 +41,25 @@ export async function initApp() {
           JOIN symbols s ON m.symbol_id = s.id
           ORDER BY m.symbol_id, m.timestamp DESC
         `)
+
+        // Serverless Fallback: If DB is empty or data is > 5 mins old, fetch on-demand!
+        const isStale = rows.length === 0 || (new Date().getTime() - new Date(rows[0].timestamp).getTime() > 5 * 60 * 1000)
+        if (isStale) {
+          const { fetchAndStoreMirages } = await import('./mirage_scheduler')
+          await fetchAndStoreMirages()
+          const freshData = await pool.query(`
+            SELECT DISTINCT ON (m.symbol_id)
+              m.id, m.symbol_id, m.oi_percentile, m.bid_ask_ratio,
+              m.funding_rate, m.mirage_score, m.status, m.price,
+              m.timestamp::text as timestamp,
+              s.symbol
+            FROM mirages m
+            JOIN symbols s ON m.symbol_id = s.id
+            ORDER BY m.symbol_id, m.timestamp DESC
+          `)
+          rows = freshData.rows
+        }
+
         return rows
       } catch (err: any) {
         return reply.status(500).send({ error: err.message })
