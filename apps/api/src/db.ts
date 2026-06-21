@@ -57,6 +57,10 @@ export async function ensureSchema() {
       INSERT INTO symbols (symbol) VALUES ('BTC'), ('ETH'), ('SOL'), ('BNB'), ('MATIC'), ('AVAX')
       ON CONFLICT DO NOTHING;
     `)
+
+    // Migration for existing tables
+    await client.query(`ALTER TABLE mirages ADD COLUMN IF NOT EXISTS price FLOAT;`)
+
     console.log('[db] Schema ensured.')
   } finally {
     client.release()
