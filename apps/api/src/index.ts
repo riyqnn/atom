@@ -7,9 +7,14 @@ import { startMirageScheduler } from './mirage_scheduler'
 import { MirageStrategyRequest, generateYamlStrategy, validateYamlStrategy } from './strategy_service'
 import { runBacktestJob, fetchBacktestResult } from './backtest_worker'
 
-const app = Fastify({ logger: false })
+export const app = Fastify({ logger: false })
 
-async function main() {
+let initialized = false
+
+export async function initApp() {
+  if (initialized) return
+  initialized = true
+
   // ── CORS ────────────────────────────────────────────
   await app.register(cors, { origin: '*' })
 
@@ -111,23 +116,17 @@ async function main() {
       return reply.status(500).send({ error: err.message })
     }
   })
-
-  // ── Start server ────────────────────────────────────
-  const port = parseInt(process.env.PORT || '4000')
-  const address = await app.listen({ port, host: '0.0.0.0' })
-  console.log(`\n ATOM API listening at ${address}`)
-  console.log(`   GET  /health`)
-  console.log(`   GET  /mirage/latest`)
-  console.log(`   GET  /mirage/history?symbol=BTC&days=90`)
-  console.log(`   POST /strategy/generate`)
-  console.log(`   POST /backtest/run`)
-  console.log(`   GET  /backtest/status?job_id=xxx\n`)
-
-  // ── Start scheduler ────────────────────────────────
-  startMirageScheduler()
 }
 
-main().catch((err) => {
-  console.error('Fatal startup error:', err)
-  process.exit(1)
-})
+// ── Start server if not running in Vercel ──────────────
+if (!process.env.VERCEL) {
+  initApp().then(async () => {
+    const port = parseInt(process.env.PORT || '4000')
+    const address = await app.listen({ port, host: '0.0.0.0' })
+    console.log(`\n ATOM API listening at ${address}`)
+    startMirageScheduler()
+  }).catch((err) => {
+    console.error('Fatal startup error:', err)
+    process.exit(1)
+  })
+}
