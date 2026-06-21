@@ -54,12 +54,28 @@ export async function ensureSchema() {
         created_at TIMESTAMPTZ DEFAULT NOW(),
         finished_at TIMESTAMPTZ
       );
-      INSERT INTO symbols (symbol) VALUES ('BTC'), ('ETH'), ('SOL'), ('BNB'), ('MATIC'), ('AVAX')
+      INSERT INTO symbols (symbol, name) VALUES 
+        ('BTC', 'Bitcoin'), 
+        ('ETH', 'Ethereum'), 
+        ('SOL', 'Solana'), 
+        ('BNB', 'Binance Coin'), 
+        ('MATIC', 'Polygon'), 
+        ('AVAX', 'Avalanche')
       ON CONFLICT DO NOTHING;
     `)
 
     // Migration for existing tables
-    await client.query(`ALTER TABLE mirages ADD COLUMN IF NOT EXISTS price FLOAT;`)
+    await client.query(`
+      ALTER TABLE mirages ADD COLUMN IF NOT EXISTS price FLOAT;
+      
+      ALTER TABLE backtests ALTER COLUMN metrics DROP NOT NULL;
+      ALTER TABLE backtests ADD COLUMN IF NOT EXISTS symbol VARCHAR(20);
+      ALTER TABLE backtests ADD COLUMN IF NOT EXISTS strategy_yaml TEXT;
+      ALTER TABLE backtests ADD COLUMN IF NOT EXISTS trades JSONB;
+      ALTER TABLE backtests ADD COLUMN IF NOT EXISTS equity_curve JSONB;
+      ALTER TABLE backtests ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'running';
+      ALTER TABLE backtests ADD COLUMN IF NOT EXISTS finished_at TIMESTAMPTZ;
+    `)
 
     console.log('[db] Schema ensured.')
   } finally {
