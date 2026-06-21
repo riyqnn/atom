@@ -1,5 +1,5 @@
 import { pool } from './db'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 import YAML from 'yaml'
 import { calcMirageScore, classifyMirage } from './mirage_calc'
 
@@ -12,7 +12,7 @@ export type BacktestPayload = {
 
 // ── In-memory backtest execution (no Redis needed) ────────────────
 export async function runBacktestJob(strategy_yaml: string, symbol: string, days: number): Promise<string> {
-  const job_id = uuidv4()
+  const job_id = randomUUID()
   
   // Insert as 'running'
   await pool.query(
