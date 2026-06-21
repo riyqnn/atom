@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@types/*": ["packages/types/*"],
+      "@config/*": ["packages/config/*"],
+      "@ui/*": ["packages/ui/*"]
+    }
+  }
+}
