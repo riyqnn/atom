@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.0.0",
+    "@types/pg": "^8.20.0",
     "tsup": "^8.5.1"
   },
   "dependencies": {
