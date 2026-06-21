@@ -19,7 +19,11 @@ export async function initApp() {
   await app.register(cors, { origin: '*' })
 
   // ── Auto-migrate DB ─────────────────────────────────
-  await ensureSchema()
+  try {
+    await ensureSchema()
+  } catch (err: any) {
+    console.error('[DB] Failed to ensure schema. Check DATABASE_URL:', err.message)
+  }
 
   // ── Health ──────────────────────────────────────────
   app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
