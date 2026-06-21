@@ -1,9 +1,15 @@
 import 'dotenv/config'
 import { Pool } from 'pg'
 
+let connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/postgres'
+// Supabase pooler on port 6543 hangs on Vercel's IPv6 network. Fallback to direct port 5432.
+if (connectionString.includes('pooler.supabase.com') && connectionString.includes(':6543')) {
+  connectionString = connectionString.replace(':6543', ':5432').replace('?pgbouncer=true', '')
+}
+
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/postgres',
-  ssl: process.env.NODE_ENV === 'production' || process.env.DATABASE_URL?.includes('supabase') ? { rejectUnauthorized: false } : undefined
+  connectionString,
+  ssl: process.env.NODE_ENV === 'production' || connectionString.includes('supabase') ? { rejectUnauthorized: false } : undefined
 })
 
 export async function query<T = any>(text: string, params?: any[]): Promise<T[]> {
