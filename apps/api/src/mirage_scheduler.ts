@@ -38,7 +38,7 @@ export async function fetchAndStoreMirages() {
     // Try real CMC data first
     const cmcData = await fetchCmcQuotes(symbolNames)
 
-    for (const sym of symbols) {
+    const promises = symbols.map(async (sym: any) => {
       // OI / Orderbook / Funding are not available on free CMC tier
       // so we compute realistic synthetic data that CHANGES each cycle
       const oiPercentile = 25 + Math.random() * 65
@@ -52,12 +52,14 @@ export async function fetchAndStoreMirages() {
       const base = PRICE_MAP[sym.symbol] ?? 100
       const price = cmcData?.[sym.symbol]?.price ?? base * (1 + (Math.random() - 0.5) * 0.02)
 
-      await pool.query(
+      return pool.query(
         `INSERT INTO mirages (symbol_id, timestamp, oi_percentile, bid_ask_ratio, funding_rate, mirage_score, status, price)
          VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7)`,
         [sym.id, oiPercentile, bidAskRatio, fundingRate, mirageScore, status, price],
       )
-    }
+    })
+
+    await Promise.all(promises)
     console.log(`[scheduler] Mirage snapshot stored @ ${new Date().toISOString()}`)
   } catch (err: any) {
     console.error('[scheduler] Error:', err.message)

@@ -34,17 +34,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <motion.div
+            <motion.img
+              src="/logo.png"
+              alt="Atom Logo"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              className="w-8 h-8 rounded-xl object-cover"
               style={{
-                background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-                boxShadow: '0 4px 12px rgba(59,130,246,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+                boxShadow: '0 4px 12px rgba(59,130,246,0.2)',
               }}
-            >
-              <Waves className="w-4 h-4 text-white" />
-            </motion.div>
+            />
             <div>
               <div
                 className="text-base font-bold gradient-text leading-none"

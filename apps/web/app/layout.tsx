@@ -22,9 +22,11 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "ATOM — Advanced Trading Optimization Matrix",
-  description:
-    "LLM-powered strategy generation platform. Detect Liquidity Mirages, generate quantitative strategies, and validate through backtesting.",
+  description: "Mirage Detector",
   keywords: ["crypto", "trading", "strategy", "LLM", "derivatives", "backtest"],
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
