@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+
 import { pool } from './db'
 import { calcMirageScore, classifyMirage } from './mirage_calc'
 

@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+
 
 const CMC_API_KEY = process.env.CMC_API_KEY || ''
 const BASE_URL = 'https://pro-api.coinmarketcap.com/v1'
